@@ -1,22 +1,27 @@
-const Database = require('./database/db')
+const Database = require('./database/db');
 
 // { } desestrutura o obj
-const {   subjects, weekdays, getSubject, convertHoursToMinutes } = require('./utils/format')
+const {
+  subjects,
+  weekdays,
+  getSubject,
+  convertHoursToMinutes,
+} = require('./utils/format');
 
 // Funcionalidades
 function pageLanding(req, res) {
-  return res.render("index.html") 
+  return res.render('./views/index.html');
 }
- async function pageStudy(req, res) {
-  // req.query são os dados que vem do front 
-  const filters = req.query
-  
-  if(!filters.subject || !filters.weekday || !filters.time){
-    return res.render("study.html", { filters, subjects, weekdays})
+async function pageStudy(req, res) {
+  // req.query são os dados que vem do front
+  const filters = req.query;
+
+  if (!filters.subject || !filters.weekday || !filters.time) {
+    return res.render('./views/study.html', { filters, subjects, weekdays });
   }
 
   // converter horas em minutos
-  const timeToMinutes = convertHoursToMinutes(filters.time)
+  const timeToMinutes = convertHoursToMinutes(filters.time);
 
   const query = `
     SELECT classes.*, proffys.* 
@@ -31,70 +36,67 @@ function pageLanding(req, res) {
       AND class_schedule.time_to > ${timeToMinutes}
     )
     AND classes.subject = ${filters.subject}
-  `
+  `;
 
   // caso haja erro na hora da consulta no banco
   try {
-      const db = await Database
-      const proffys = await db.all(query)
+    const db = await Database;
+    const proffys = await db.all(query);
 
-      proffys.map((proffy) => {
-        proffy.subject = getSubject(proffy.subject)
-      })
+    proffys.map((proffy) => {
+      proffy.subject = getSubject(proffy.subject);
+    });
 
-      return res.render('study.html', { proffys, subjects, filters, weekdays })
-
+    return res.render('./views/study.html', {
+      proffys,
+      subjects,
+      filters,
+      weekdays,
+    });
   } catch (error) {
-      console.log(error)
-    
+    console.log(error);
   }
-  
 }
 function pageGiveClasses(req, res) {
-  return res.render("give-classes.html", { subjects, weekdays })
+  return res.render('./views/give-classes.html', { subjects, weekdays });
 }
 
 async function saveClasses(req, res) {
-  const createProffy = require('./database/createProffy')
-  
-  const proffyValue = { 
+  const createProffy = require('./database/createProffy');
+
+  const proffyValue = {
     name: req.body.name,
     avatar: req.body.avatar,
     whatsapp: req.body.whatsapp,
-    bio: req.body.bio
-  }
+    bio: req.body.bio,
+  };
 
   const classValue = {
     subject: req.body.subject,
-    cost: req.body.cost
-  }
+    cost: req.body.cost,
+  };
 
   const classScheduleValues = req.body.weekday.map((weekday, index) => {
-
     return {
-        // weekday é a mesma coisa de weekday: weekday
-        weekday,
-        time_from: convertHoursToMinutes(req.body.time_from[index]),
-        time_to: convertHoursToMinutes(req.body.time_to[index])
-
-    }
-  })
+      // weekday é a mesma coisa de weekday: weekday
+      weekday,
+      time_from: convertHoursToMinutes(req.body.time_from[index]),
+      time_to: convertHoursToMinutes(req.body.time_to[index]),
+    };
+  });
 
   try {
-    const db = await Database
-    await createProffy(db, { proffyValue, classValue, classScheduleValues })
-  
-    let queryString = "?subject=" + req.body.subject
-    queryString += "&weekday=" + req.body.weekday[0]
-    queryString += "&time=" + req.body.time_from[0]
-    
-    return res.redirect("/study" + queryString)
-    
-  } catch (error) {
-    console.log(error)
-    
-  }
+    const db = await Database;
+    await createProffy(db, { proffyValue, classValue, classScheduleValues });
 
+    let queryString = '?subject=' + req.body.subject;
+    queryString += '&weekday=' + req.body.weekday[0];
+    queryString += '&time=' + req.body.time_from[0];
+
+    return res.redirect('./views/study.html' + queryString);
+  } catch (error) {
+    console.log(error);
+  }
 
   // foi usado para banco local
   // const data = req.query;
@@ -111,5 +113,5 @@ module.exports = {
   pageLanding,
   pageStudy,
   pageGiveClasses,
-  saveClasses
-}
+  saveClasses,
+};

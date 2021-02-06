@@ -1,34 +1,33 @@
 // Servidor
-const express = require('express')
-const server = express()
+const express = require('express');
+const server = express();
 
-const { 
+const {
   pageLanding,
-  pageStudy, 
-  pageGiveClasses, 
-  saveClasses
- } = require('./pages')
+  pageStudy,
+  pageGiveClasses,
+  saveClasses,
+} = require('./pages.js');
 
 //configuração nunjucks (template engine)
-const nunjucks = require('nunjucks')
+const nunjucks = require('nunjucks');
 nunjucks.configure('src/views', {
   express: server,
-  noCache: true
-})
+  noCache: true,
+});
 
 //Inicio e configuração do servidor
 server
-// receber os dados do req.body
-.use(express.urlencoded({ extended: true}))
-// configurar arquivos estáticos (css, scripst, imagens)
-.use(express.static("public"))
-// arrow function
-// (requisição, resposta)
-//  rotas da aplicação
-.get("/", pageLanding)
-.get("/study", pageStudy)
-.get("/give-classes", pageGiveClasses)
-.post("/save-classes", saveClasses)
-// start servidor
-.listen(8800)
-
+  // receber os dados do req.body
+  .use(express.urlencoded({ extended: true }))
+  // configurar arquivos estáticos (css, scripst, imagens)
+  .use(express.static('public'))
+  // arrow function
+  // (requisição, resposta)
+  //  rotas da aplicação
+  .get('/', pageLanding)
+  .get('study', pageStudy)
+  .get('give-classes', pageGiveClasses)
+  .post('save-classes', saveClasses)
+  // start servidor
+  .listen(8800);
